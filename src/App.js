@@ -388,7 +388,19 @@ function WorkoutScreen({profile,workoutLog,setWorkoutLog,cfLog,savedRoutines,set
   const updSet = (si,f,v) => setWorkoutData(p=>{const a=p.map(e=>({...e,sets:[...e.sets]}));a[curExIdx].sets[si]={...a[curExIdx].sets[si],[f]:v};return a;});
   const toggleMain = si => setWorkoutData(p=>{const a=p.map(e=>({...e,sets:[...e.sets]}));a[curExIdx].sets[si]={...a[curExIdx].sets[si],isMain:!a[curExIdx].sets[si].isMain};return a;});
   const toggleDone = si => setWorkoutData(p=>{const a=p.map(e=>({...e,sets:[...e.sets]}));a[curExIdx].sets[si]={...a[curExIdx].sets[si],done:!a[curExIdx].sets[si].done};return a;});
-  const addSet    = () => setWorkoutData(p=>{const a=p.map(e=>({...e,sets:[...e.sets]}));a[curExIdx].sets.push({weight:"",reps:"",isMain:false,done:false});return a;});
+  const addSet = (type="main") => setWorkoutData(p=>{
+    const a=p.map(e=>({...e,sets:[...e.sets]}));
+    const newSet = {weight:"",reps:"",isMain:type==="main",isWarmup:type==="warmup",isCooldown:type==="cooldown",done:false};
+    if(type==="warmup"){
+      // 웜업은 첫 메인 세트 앞에 삽입
+      const firstMainIdx = a[curExIdx].sets.findIndex(s=>s.isMain);
+      if(firstMainIdx>=0) a[curExIdx].sets.splice(firstMainIdx,0,newSet);
+      else a[curExIdx].sets.unshift(newSet);
+    } else {
+      a[curExIdx].sets.push(newSet);
+    }
+    return a;
+  });
   const removeSet = si => setWorkoutData(p=>{const a=p.map(e=>({...e,sets:[...e.sets]}));a[curExIdx].sets.splice(si,1);return a;});
 
   const getRmPct = (name,weight) => {
@@ -603,7 +615,11 @@ function WorkoutScreen({profile,workoutLog,setWorkoutLog,cfLog,savedRoutines,set
             </div>
           ))}
           <Lbl style={{marginTop:6,fontSize:10}}>M = 메인 세트 활성화 · 메인만 볼륨 집계</Lbl>
-          <button onClick={addSet} style={{marginTop:4,fontSize:12,padding:"4px 10px",border:`0.5px solid ${C.border}`,borderRadius:7,background:"transparent",cursor:"pointer",color:C.muted}}>+ 세트 추가</button>
+          <div style={{display:"flex",gap:6,marginTop:6}}>
+            <button onClick={()=>addSet("warmup")} style={{flex:1,fontSize:11,padding:"5px 6px",border:`0.5px solid ${C.border}`,borderRadius:7,background:"transparent",cursor:"pointer",color:C.muted}}>+ 웜업</button>
+            <button onClick={()=>addSet("main")} style={{flex:1,fontSize:11,padding:"5px 6px",border:`0.5px solid ${C.green}`,borderRadius:7,background:"transparent",cursor:"pointer",color:C.green}}>+ 메인</button>
+            <button onClick={()=>addSet("cooldown")} style={{flex:1,fontSize:11,padding:"5px 6px",border:`0.5px solid ${C.amber}`,borderRadius:7,background:"transparent",cursor:"pointer",color:C.amber}}>+ 쿨다운</button>
+          </div>
           {exRestLogs.length>0 && (
             <div style={{marginTop:8,padding:"6px 10px",background:C.card2,borderRadius:8}}>
               <Lbl>세트간 휴식</Lbl>
