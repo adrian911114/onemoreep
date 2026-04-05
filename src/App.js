@@ -999,13 +999,47 @@ function CrossfitScreen({cfLog,setCfLog,workoutLog,profile}) {
   );
 
   // ── Done ──
-  if(phase==="done") return (
-    <div style={{textAlign:"center",padding:30}}>
-      <div style={{fontSize:40,marginBottom:12}}>🎉</div>
-      <p style={{fontSize:18,fontWeight:700,color:C.green,marginBottom:8}}>기록 저장 완료!</p>
-      <button onClick={()=>setPhase("calendar")} style={{padding:"12px 28px",background:C.accent,color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:15,fontWeight:600}}>달력으로 →</button>
-    </div>
-  );
+  if(phase==="done") {
+    const lastRec = (()=>{
+      const dayLogs = cfLog[activeDate]||[];
+      return dayLogs.find(l=>l.name===(wodName||wodFormat))||null;
+    })();
+    const pr3=(profile.squat||0)+(profile.bench||0)+(profile.dead||0);
+    const instaText = lastRec ? [
+      `🏋️ ${lastRec.name}`,
+      `📅 ${lastRec.date}${profile.nick?" @"+profile.nick:""}`,
+      ``,
+      `📋 포맷: ${lastRec.format}`,
+      `🏆 스코어: ${lastRec.score||"-"} ${lastRec.scaleMode==="rx"?"(RX)":"(Scale)"}`,
+      ``,
+      ...(lastRec.movements||[]).map(m=>`  ▪ ${m.name} ${m.reps}회${m.weight?` / ${m.weight}`:""}`),
+      ``,
+      `⏱ 운동 시간: ${fmtT(lastRec.tt)}`,
+      `🔥 예상 칼로리: ${lastRec.cal} kcal`,
+      pr3?`💪 3대 합계: ${pr3}kg`:"",
+      ``,
+      `${HASHTAG} #크로스핏 #CrossFit #WOD #${lastRec.name.replace(/\s/g,"")}`,
+    ].filter(l=>l!==null).join("\n") : "";
+
+    return (
+      <div>
+        <div style={{textAlign:"center",padding:"20px 0 12px"}}>
+          <div style={{fontSize:40,marginBottom:8}}>🎉</div>
+          <p style={{fontSize:18,fontWeight:700,color:C.green,marginBottom:4}}>기록 저장 완료!</p>
+          {lastRec&&<p style={{fontSize:14,color:C.accentL,fontWeight:600}}>{lastRec.name} — {lastRec.score||"-"}</p>}
+        </div>
+        {lastRec&&(
+          <GCard>
+            <Lbl>인스타 텍스트</Lbl>
+            <pre style={{fontFamily:"monospace",fontSize:11,lineHeight:1.8,whiteSpace:"pre-wrap",wordBreak:"break-all",background:C.card2,borderRadius:8,padding:12,maxHeight:200,overflowY:"auto",color:C.text}}>{instaText}</pre>
+            <button onClick={()=>navigator.clipboard.writeText(instaText).then(()=>alert("복사 완료 ✓"))}
+              style={{marginTop:8,padding:"6px 14px",border:`0.5px solid ${C.border}`,borderRadius:7,background:"transparent",color:C.accentL,cursor:"pointer",fontSize:12}}>텍스트 복사</button>
+          </GCard>
+        )}
+        <PBtn onClick={()=>setPhase("calendar")}>달력으로 →</PBtn>
+      </div>
+    );
+  }
 
   return null;
 }
