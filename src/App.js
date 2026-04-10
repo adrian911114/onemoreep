@@ -449,6 +449,12 @@ function ProfileModal({profile,setProfile,history,setHistory,workoutLog,cfLog,on
                 <span style={{position:"absolute",top:3,left:dataConsent==="accepted"?26:4,width:20,height:20,borderRadius:"50%",background:"#fff",transition:"left .2s"}}/>
               </button>
             </div>
+            {dataConsent==="accepted" && (
+              <div style={{background:C.card2,borderRadius:10,padding:"8px 14px",marginBottom:10,border:`0.5px solid ${C.border}`}}>
+                <div style={{fontSize:11,color:C.muted,marginBottom:2}}>내 익명 ID</div>
+                <div style={{fontSize:11,color:C.accentL,fontFamily:"monospace",wordBreak:"break-all"}}>{getOrCreateAnonId()}</div>
+              </div>
+            )}
             <div style={{background:"#1e3a6e",borderRadius:10,padding:12,textAlign:"center",marginBottom:14}}>
               <div style={{fontSize:11,color:C.accentL,marginBottom:4}}>3대 합계 (설정값)</div>
               <div style={{fontSize:26,fontWeight:700,color:"#fff"}}>{total} kg</div>
